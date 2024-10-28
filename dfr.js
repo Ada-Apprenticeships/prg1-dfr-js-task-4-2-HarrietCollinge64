@@ -34,7 +34,7 @@ function dataDimensions(dataframe) {
 function findTotal(dataset) {
   // returns float or false
   let total = 0
-  if (dataset.length===0|| (Array.isArray(dataset[0]) && dataset.length === 1)){return 0}
+  if (dataset.length===0|| (Array.isArray(dataset[0]) && dataset.length === 1)){return 0} // ensures array is valid 
     dataset.forEach(row => {
       if (Array.isArray(row)) {
         row.forEach(value => {
@@ -57,7 +57,7 @@ function calculateMean(dataset) {
    // returns a float or false
    let total = 0
    let count = 0
-   if (dataset.length===0|| (Array.isArray(dataset[0]) && dataset.length === 1)){return 0}
+   if (dataset.length===0|| (Array.isArray(dataset[0]) && dataset.length === 1)){return 0} 
      dataset.forEach(row => {
        if (Array.isArray(row)) {
          row.forEach(value => {
@@ -110,6 +110,7 @@ function convertToNumber(dataframe, col) {
 function flatten(dataframe) {
    // returns a dataset (a flattened dataframe)
    let newArray = []
+   //checks df only has one column then adds each value to a single dimension array
    if (dataDimensions(dataframe)[1] == 1) {
      for(row in dataframe){
        newArray.push(dataframe[row][0])
@@ -121,28 +122,28 @@ function flatten(dataframe) {
 function loadCSV(csvFile, ignoreRows = [], ignoreCols = []) {
   // returns a list comprising of [dataframe, rows (integer), cols (integer)]
   try {
-    
     const data = fs.readFileSync(csvFile, "utf-8")
     const rows = data.split(/\n/)
     let numCols = 0
     let newArray = []
    
     for (let i = 0; i < rows.length; i++) {
+      // skips row if index of current row is included in ignoreRows array
       if (!ignoreRows.includes(i)) {
         const cols = rows[i].split(",");
         numCols = cols.length
-        let filteredCols = [];
+        let allowedCols = []
 
         for (let x = 0; x < cols.length; x++) {
           if (!ignoreCols.includes(x)) {
-            filteredCols.push(cols[x]) 
-            
+            //if column index is not included in ignoreCols then the column value is added to a temporary array
+            allowedCols.push(cols[x]) 
           }
         }
-        if (filteredCols.length >0) {
-          newArray.push(filteredCols)
+        if (allowedCols.length >0) {
+          //if filteredCols is not empty then it is added to newArray
+          newArray.push(allowedCols)
         }
-      
       }
   }
   return [newArray, rows.length, numCols]
@@ -152,41 +153,31 @@ function loadCSV(csvFile, ignoreRows = [], ignoreCols = []) {
 }
 
 }
-//console.log(loadCSV("./sales_data.csv", [0], [0,5,6]))
+console.log(loadCSV(
+  "./sales_data.csv",
+  [0], 
+  [] 
+))
 
 function createSlice(dataframe, columnIndex, pattern, exportColumns = []) {
-  
   const result =[]
 
-    for (let rows = 0; rows < dataframe.length; rows++) {
-     // for (let cols = 0; cols < rows.length; cols++) {
-        if (dataframe[rows][columnIndex] === pattern || pattern == "*") {
-          if (exportColumns.length===0) {
-            
-            result.push(dataframe[rows])
-          }
-          else{
-            const selectedCols = exportColumns.map(index => dataframe[rows][index])
-            result.push(selectedCols)
-          }
-        }
-        
-      //}
-      
+  for (let rows = 0; rows < dataframe.length; rows++) {
+    if (dataframe[rows][columnIndex] === pattern || pattern == "*") {
+      if (exportColumns.length===0) {
+        //pushes rows to result if the specified column matches pattern or pattern is wildcard
+        result.push(dataframe[rows])
+      }
+      else{
+        // creates a new array containing the values from specified colums in exportColumns
+        const selectedCols = exportColumns.map(index => dataframe[rows][index])
+        result.push(selectedCols)
+      }
     }
-  
+  }
   return result
 }
 
-const salesData = [
-  ["region", "product", "sales", "profit"], 
-  ["north", "laptop", 1000, 200],
-  ["south", "phone", 500, 100],
-  ["north", "tablet", 750, 150],
-  ["east", "laptop", 1200, 240],
-];
-
-console.log(createSlice(salesData, 0 , "north"))
 
 module.exports = {
   fileExists,
