@@ -80,12 +80,16 @@ function calculateMean(dataset) {
 function calculateMedian(dataset) {
   // filters dataset to only include valid numbers
   dataset = dataset.filter(element => validNumber(element))
+
   // returns false if dataset is not valid
   if (dataset.length===0|| (Array.isArray(dataset[0]) && dataset.length === 1)){return 0}
   dataset.sort((a, b) => a - b);
   let i = (dataset.length)/2
+
   // find average of middle 2 numbers if length is even, if odd then returns the value in the middle as a float
-  return dataset.length%2 === 0 ? ( dataset[i] +  dataset[i -1])/2 : parseFloat(dataset[i - 0.5])
+  return dataset.length%2 === 0 
+    ? ( dataset[i] +  dataset[i -1])/2
+    : parseFloat(dataset[i - 0.5])
 }
 
 function convertToNumber(dataframe, col) {
@@ -110,6 +114,7 @@ function convertToNumber(dataframe, col) {
 function flatten(dataframe) {
    // returns a dataset (a flattened dataframe)
    let newArray = []
+   
    //checks df only has one column then adds each value to a single dimension array
    if (dataDimensions(dataframe)[1] == 1) {
      for(row in dataframe){
@@ -145,19 +150,12 @@ function loadCSV(csvFile, ignoreRows = [], ignoreCols = []) {
           newArray.push(allowedCols)
         }
       }
+    }
+    return [newArray, rows.length, numCols]
+  } catch (error) {
+    return [[],-1,-1]
   }
-  return [newArray, rows.length, numCols]
-
-} catch (error) {
-  return [[],-1,-1]
 }
-
-}
-console.log(loadCSV(
-  "./sales_data.csv",
-  [0], 
-  [] 
-))
 
 function createSlice(dataframe, columnIndex, pattern, exportColumns = []) {
   const result =[]
